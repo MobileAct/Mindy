@@ -1,13 +1,13 @@
 trigger:
-  - master
-
-pr:
-  - master
+  tags:
+    include:
+      - v-*
 
 pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+  - script: echo -e 'versionTag=$(Build.SourceBranchName)' >> gradle.properties
   - task: Gradle@2
     inputs:
       workingDirectory: ''
@@ -18,4 +18,4 @@ steps:
       jdkArchitectureOption: 'x64'
       publishJUnitResults: true
       testResultsFiles: '**/TEST-*.xml'
-      tasks: 'test'
+      tasks: 'bintrayUpload'

@@ -1,4 +1,10 @@
+plugins {
+    id "com.jfrog.bintray" version "1.8.4"
+}
+
 apply plugin: 'kotlin'
+apply plugin: 'java-library'
+apply plugin: "maven-publish"
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -23,3 +29,37 @@ compileTestKotlin {
 }
 
 test { useJUnitPlatform() }
+
+String versionTag = project.hasProperty("versionTag") ? project.property("versionTag") : ""
+
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_KEY")
+    publications = ["bintray"]
+    pkg {
+        repo = "Mindy"
+        name = "Mindy"
+        userOrg = "MobileAct"
+        licenses = ["MIT"]
+        githubRepo = "MobileAct/Mindy"
+        version {
+            name = versionTag.replaceAll("v-","")
+            desc = "Minimum DI"
+            vcsTag = versionTag
+
+        }
+    }
+}
+
+publishing {
+    publications {
+        bintray(MavenPublication) {
+            from components.java
+            groupId "mobile-act"
+            artifactId "mindy"
+            version versionTag.replaceAll("v-","")
+        }
+    }
+}
+
+bintrayUpload.dependsOn assemble
