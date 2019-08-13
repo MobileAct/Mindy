@@ -39,7 +39,7 @@ bintray {
     pkg {
         repo = "Mindy"
         name = "Mindy"
-        userOrg = "MobileAct"
+        userOrg = "mobile-act"
         licenses = ["MIT"]
         githubRepo = "MobileAct/Mindy"
         version {
