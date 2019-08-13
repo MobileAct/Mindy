@@ -1,4 +1,6 @@
 # Mindy
+[![Build Status](https://dev.azure.com/MobileAct/Mindy/_apis/build/status/MobileAct.Mindy?branchName=master)](https://dev.azure.com/MobileAct/Mindy/_build/latest?definitionId=1&branchName=master) [ ![Download](https://api.bintray.com/packages/mobile-act/Mindy/Mindy/images/download.svg) ](https://bintray.com/mobile-act/Mindy/Mindy/_latestVersion)
+
 Mindy is Minimum Dependency Injection library.
 
 Feature:
@@ -7,6 +9,24 @@ Feature:
 - Create parameterized instance
 
 ## Usage
+### Install
+build.gradle
+```groovy
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven{ url "https://dl.bintray.com/mobile-act/Mindy" } // need!
+    }
+}
+```
+
+```groovy
+dependencies {
+    implementation 'mobile-act:mindy:VERSION' // adapt latest version
+}
+```
+
 ### Simple
 ```kotlin
 val mindy = Mindy()
