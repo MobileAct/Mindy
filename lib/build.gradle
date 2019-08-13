@@ -34,6 +34,7 @@ String versionTag = project.hasProperty("versionTag") ? project.property("versio
 
 bintray {
     user = System.getenv("BINTRAY_USER")
+    println(user)
     key = System.getenv("BINTRAY_KEY")
     publications = ["bintray"]
     pkg {
