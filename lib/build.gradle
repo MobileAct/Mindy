@@ -36,6 +36,7 @@ bintray {
     user = project.hasProperty("BINTRAY_USER") ? project.property("BINTRAY_USER") : ""
     key = project.hasProperty("BINTRAY_KEY") ? project.property("BINTRAY_KEY") : ""
     publications = ["bintray"]
+    publish = true
     pkg {
         repo = "Mindy"
         name = "Mindy"
