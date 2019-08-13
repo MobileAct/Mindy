@@ -33,9 +33,8 @@ test { useJUnitPlatform() }
 String versionTag = project.hasProperty("versionTag") ? project.property("versionTag") : ""
 
 bintray {
-    user = System.getenv("BINTRAY_USER")
-    println(user)
-    key = System.getenv("BINTRAY_KEY")
+    user = project.hasProperty("BINTRAY_USER") ? project.property("BINTRAY_USER") : ""
+    key = project.hasProperty("BINTRAY_KEY") ? project.property("BINTRAY_KEY") : ""
     publications = ["bintray"]
     pkg {
         repo = "Mindy"
@@ -44,7 +43,7 @@ bintray {
         licenses = ["MIT"]
         githubRepo = "MobileAct/Mindy"
         version {
-            name = versionTag.replaceAll("v-","")
+            name = versionTag.replaceAll("v-", "")
             desc = "Minimum DI"
             vcsTag = versionTag
 
@@ -58,7 +57,7 @@ publishing {
             from components.java
             groupId "mobile-act"
             artifactId "mindy"
-            version versionTag.replaceAll("v-","")
+            version versionTag.replaceAll("v-", "")
         }
     }
 }

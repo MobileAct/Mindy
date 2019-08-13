@@ -7,7 +7,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-  - script: echo -e 'versionTag=$(Build.SourceBranchName)' >> gradle.properties
+  - script: echo -e 'versionTag=$(Build.SourceBranchName)\nBINTRAY_USER=$(BINTRAY_USER)\nBINTRAY_KEY=$(BINTRAY_KEY)' >> gradle.properties
   - task: Gradle@2
     inputs:
       workingDirectory: ''
