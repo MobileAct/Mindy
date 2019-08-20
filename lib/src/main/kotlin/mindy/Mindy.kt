@@ -42,6 +42,7 @@ class Mindy : IReadOnlyMindy {
 
     private val entries = mutableMapOf<String, Entry<*>>()
     private val transactionEntries = mutableMapOf<String, Entry<*>>()
+    internal val transactionEntryCount get() = transactionEntries.size
     private var isTransaction = false
 
     fun beginTransaction() {
@@ -51,6 +52,7 @@ class Mindy : IReadOnlyMindy {
     fun commitTransaction() {
         isTransaction = false
         entries.putAll(transactionEntries)
+        transactionEntries.clear()
     }
 
     fun rollbackTransaction() {
@@ -75,16 +77,9 @@ class Mindy : IReadOnlyMindy {
         }
     }
 
-    private fun findEntry(
-        typeIdentifier: String,
-        name: String = "",
-        additionalResolver: (Mindy.() -> Unit)? = null
-    ): Entry<*> {
-        beginTransaction()
-        additionalResolver?.invoke(this)
-
+    private fun findEntry(typeIdentifier: String, name: String = ""): Entry<*> {
         val identifier = identifier(typeIdentifier, name)
-        return transactionEntries[identifier]?.also { rollbackTransaction() }
+        return transactionEntries[identifier]
             ?: entries[identifier]
             ?: throw IllegalStateException("$identifier is not registered")
     }
@@ -95,7 +90,15 @@ class Mindy : IReadOnlyMindy {
         name: String,
         additionalResolver: (Mindy.() -> Unit)?
     ): T {
-        return findEntry(typeIdentifier, name, additionalResolver).resolve(this) as T
+        beginTransaction()
+        additionalResolver?.invoke(this)
+
+        val result = findEntry(typeIdentifier, name).resolve(this) as T
+
+        if (additionalResolver != null) {
+            rollbackTransaction()
+        }
+        return result
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -104,7 +107,15 @@ class Mindy : IReadOnlyMindy {
         name: String,
         additionalResolver: (Mindy.() -> Unit)?
     ): T {
-        return findEntry(typeIdentifier, name, additionalResolver).create(this) as T
+        beginTransaction()
+        additionalResolver?.invoke(this)
+
+        val result = findEntry(typeIdentifier, name).create(this) as T
+
+        if (additionalResolver != null) {
+            rollbackTransaction()
+        }
+        return result
     }
 }
 

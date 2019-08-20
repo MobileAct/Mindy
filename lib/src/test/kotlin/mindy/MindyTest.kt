@@ -121,6 +121,8 @@ class MindyTest {
             register<IValue<String>> { StringValue("b") }
         }
 
+        assertEquals(0, mindy.transactionEntryCount)
+
         assertEquals("a", a.value.value)
         assertEquals("a", b.value.value) // because resolve() is singleton
     }
@@ -137,11 +139,42 @@ class MindyTest {
             register<IValue<Int>> { Value(1) }
         }
 
+        assertEquals(0, mindy.transactionEntryCount)
+
         assertEquals("a", a.value.value)
 
         assertThrows<IllegalStateException> {
             mindy.resolve<IValue<IValue<Int>>>()
         }
+    }
+
+    @Test
+    fun testResolve_parameter_nestedDependency() {
+        val mindy = Mindy()
+        mindy.register<Pair<String, Pair<Int, Boolean>>> { Pair(resolve(), resolve()) }
+        mindy.register<Pair<Int, Boolean>> { Pair(resolve(), resolve()) }
+
+        val a = mindy.resolve<Pair<String, Pair<Int, Boolean>>> {
+            register { "a" }
+            register { 1 }
+            register { true }
+        }
+        val b = mindy.resolve<Pair<String, Pair<Int, Boolean>>>() {
+            register { "b" }
+            register { 2 }
+            register { false }
+        }
+
+        assertEquals(0, mindy.transactionEntryCount)
+
+        assertEquals("a", a.first)
+        assertEquals(1, a.second.first)
+        assertEquals(true, a.second.second)
+
+        // because resolve() is singleton
+        assertEquals("a", b.first)
+        assertEquals(1, b.second.first)
+        assertEquals(true, b.second.second)
     }
 
     @Test
@@ -245,6 +278,8 @@ class MindyTest {
             register<IValue<String>> { StringValue("b") }
         }
 
+        assertEquals(0, mindy.transactionEntryCount)
+
         assertEquals("a", a.value.value)
         assertEquals("b", b.value.value)
     }
@@ -261,11 +296,44 @@ class MindyTest {
             register<IValue<Int>> { Value(1) }
         }
 
+        assertEquals(0, mindy.transactionEntryCount)
+
         assertEquals("a", a.value.value)
 
         assertThrows<IllegalStateException> {
             mindy.create<IValue<IValue<Int>>>()
         }
+    }
+
+    @Test
+    fun testCreate_parameter_nestedDependency() {
+        val mindy = Mindy()
+        mindy.register<Pair<String, Pair<Int, Boolean>>> { Pair(resolve(), create()) }
+        mindy.register<Pair<Int, Boolean>> { Pair(resolve(), resolve()) }
+
+        val a = mindy.create<Pair<String, Pair<Int, Boolean>>> {
+            register { "a" }
+            register { 1 }
+            register { true }
+        }
+
+        assertEquals(0, mindy.transactionEntryCount)
+
+        val b = mindy.create<Pair<String, Pair<Int, Boolean>>>() {
+            register { "b" }
+            register { 2 }
+            register { false }
+        }
+
+        assertEquals(0, mindy.transactionEntryCount)
+
+        assertEquals("a", a.first)
+        assertEquals(1, a.second.first)
+        assertEquals(true, a.second.second)
+
+        assertEquals("b", b.first)
+        assertEquals(2, b.second.first)
+        assertEquals(false, b.second.second)
     }
 
     @Test
@@ -319,6 +387,7 @@ class MindyTest {
         mindy.commitTransaction()
 
         assertEquals("", mindy.resolve<String>())
+        assertEquals(0, mindy.transactionEntryCount)
     }
 
     @Test
@@ -329,9 +398,7 @@ class MindyTest {
         mindy.register { "" }
         mindy.rollbackTransaction()
 
-        assertThrows<IllegalStateException> {
-            mindy.resolve<String>()
-        }
+        assertEquals(0, mindy.transactionEntryCount)
     }
 
     @Test
