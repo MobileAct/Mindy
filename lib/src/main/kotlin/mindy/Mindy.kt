@@ -84,21 +84,26 @@ class Mindy : IReadOnlyMindy {
             ?: throw IllegalStateException("$identifier is not registered")
     }
 
+    private inline fun <T> transaction(crossinline function: () -> T): T {
+        beginTransaction()
+        val result = function()
+        rollbackTransaction()
+        return result
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun <T> resolve(
         typeIdentifier: String,
         name: String,
         additionalResolver: (Mindy.() -> Unit)?
     ): T {
-        beginTransaction()
-        additionalResolver?.invoke(this)
-
-        val result = findEntry(typeIdentifier, name).resolve(this) as T
-
         if (additionalResolver != null) {
-            rollbackTransaction()
+            return transaction {
+                additionalResolver.invoke(this)
+                findEntry(typeIdentifier, name).resolve(this) as T
+            }
         }
-        return result
+        return findEntry(typeIdentifier, name).resolve(this) as T
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -107,15 +112,13 @@ class Mindy : IReadOnlyMindy {
         name: String,
         additionalResolver: (Mindy.() -> Unit)?
     ): T {
-        beginTransaction()
-        additionalResolver?.invoke(this)
-
-        val result = findEntry(typeIdentifier, name).create(this) as T
-
         if (additionalResolver != null) {
-            rollbackTransaction()
+            return transaction {
+                additionalResolver.invoke(this)
+                findEntry(typeIdentifier, name).create(this) as T
+            }
         }
-        return result
+        return findEntry(typeIdentifier, name).create(this) as T
     }
 }
 

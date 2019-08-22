@@ -402,6 +402,16 @@ class MindyTest {
     }
 
     @Test
+    fun testTransaction_autoBeginToClose(){
+        val mindy = Mindy()
+
+        mindy.register{ "" }
+        mindy.resolve<String>()
+        mindy.register{ 1 }
+        assertEquals(0, mindy.transactionEntryCount)
+    }
+
+    @Test
     fun testNamed_resolve() {
         val mindy = Mindy()
 
